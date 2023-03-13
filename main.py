@@ -146,8 +146,9 @@ def player_control():
         finish_sound.stop()  # Stop play finish sound
         pygame.mixer.music.play()  # Play play background sound
         gameplay = True  # Duration of the game
-        pizza_in_game.clear()  # Clear element
-        cola_in_game.clear()  # Clear element
+        pizza_in_game.clear()  # Clear pizza
+        cola_in_game.clear()  # Clear cola
+        anvil_in_game.clear()  # Clear anvil
         scores = 0  # Scores counter
         health = [heart_image] * 5  # Health player
         things_speed = 5
