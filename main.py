@@ -27,32 +27,27 @@ heart_x = 100  # Heart position x
 heart_y = 70  # Heart position y
 
 pizza_in_game = []  # Pizza in game
-pizza_speed = 5  # Pizza move speed
-pizza_speed_spawn = 1000  # Pizza speed spawn
-pizza_size = (150, 150)  # Pizza size
-pizza_x = 0  # Pizza default x position
-pizza_y = 70  # Pizza y position
-
-cola_size = (150, 150)  # Cola size
-cola_speed = pizza_speed  # Cola move speed
 cola_in_game = []  # Cola in game
-cola_x = 0  # Cola default x position
-cola_y = 70  # Cola y position
+anvil_in_game = []  # Anvil in game
+anvil_size = (150, 100)  # Things size
+
+things_speed = 5  # Things move speed
+things_speed_spawn = 1000  # Things speed spawn
+things_size = (150, 150)  # Things size
+things_x = 0  # Things default x position
+things_y = 70  # Things y position
 
 def change_fast_game():
     """Speeding up the game"""
-    global pizza_speed, cola_speed
+    global things_speed
     if scores >= 500 and scores < 900:
-        pizza_speed = 10
-        cola_speed = 10
+        things_speed = 10
     elif scores >= 900:
-        if pizza_speed != 9:
-            pygame.time.set_timer(pizza_timer, 0)  # Delete old timer
-            pygame.time.set_timer(pizza_timer, 300)  # Create new timer
+        if things_speed != 9:
+            pygame.time.set_timer(things_timer, 0)  # Delete old timer
+            pygame.time.set_timer(things_timer, 300)  # Create new timer
 
-        pizza_speed = 9
-        cola_speed = 9
-
+        things_speed = 9
 
 
 def scores_update():
@@ -72,17 +67,17 @@ def show_health():
             if heart_margin == len(health) * 100:
                 heart_margin = 0
 
-            screen.blit(heart_image, (heart_x + heart_margin, heart_y))
+            screen.blit(heart_image, (heart_x + heart_margin, heart_y))  # Draw heart image
     else:
         finish_sound.play(-1)  # Play finish sound
         end_game()
 
-def create_pizza(pan_rect):
-    """Create pizza and check collision with pan"""
+def create_things(pan_rect):
+    """Create things and check collision with pan"""
     if pizza_in_game:
         for (i, el) in enumerate(pizza_in_game):
             screen.blit(pizza, el)  # Set pizza in display
-            el.y += pizza_speed  # Pizza falls to the bottom
+            el.y += things_speed  # Pizza falls to the bottom
 
             if el.y > 1080:
                 lost_sound.play()  # Play lost sound
@@ -92,10 +87,11 @@ def create_pizza(pan_rect):
             if pan_rect.colliderect(el):
                 eating_sound.play()  # Play eating sound
                 pizza_in_game.pop(i)  # Remove pizza which collision with pan
+
     if cola_in_game:
         for (i, el) in enumerate(cola_in_game):
             screen.blit(cola, el)  # Set cola in display
-            el.y += cola_speed  # Cola falls to the bottom
+            el.y += things_speed  # Cola falls to the bottom
 
             if el.y > 1080:
                 lost_sound.play()  # Play lost sound
@@ -103,10 +99,24 @@ def create_pizza(pan_rect):
                 cola_in_game.pop(i)  # Remove cola which fall to the bottom
 
             if pan_rect.colliderect(el):
-                drinking_sound.play()  # Play drinking sound
                 if len(health) < 10:
-                    health.append(heart_image)  # Add one health when cola collision with pan
+                    health.append(heart_image)  # Add health
+                drinking_sound.play()  # Play drinking sound
                 cola_in_game.pop(i)  # Remove cola which collision with pan
+
+    if anvil_in_game:
+        for (i, el) in enumerate(anvil_in_game):
+            screen.blit(anvil, el)  # Set cola in display
+            el.y += things_speed  # Cola falls to the bottom
+
+            if el.y > 1080:
+                anvil_in_game.pop(i)  # Remove cola which fall to the bottom
+
+            if pan_rect.colliderect(el):
+                health.pop(-1)  # Remove one health when cola fall to the bottom
+                anvil_sound.play()  # Play drinking sound
+                anvil_in_game.pop(i)  # Remove cola which collision with pan
+
 
 def pan_move():
     """Move pan"""
@@ -129,19 +139,18 @@ def end_game():
 
 def player_control():
     """Check on pressed key"""
-    global gameplay, scores, health, pizza_speed, cola_speed
+    global gameplay, scores, health, things_speed
     key = pygame.key.get_pressed()
 
     if key[pygame.K_SPACE]:
         finish_sound.stop()  # Stop play finish sound
         pygame.mixer.music.play()  # Play play background sound
         gameplay = True  # Duration of the game
-        pizza_in_game.clear() 
+        pizza_in_game.clear()  # Clear element
+        cola_in_game.clear()  # Clear element
         scores = 0  # Scores counter
         health = [heart_image] * 5  # Health player
-        pizza_speed = 5
-        cola_speed = 5
-
+        things_speed = 5
 
 clock = pygame.time.Clock()  # Create clock
 pygame.init()  # Initialization game
@@ -164,10 +173,13 @@ heart_image = pygame.transform.scale(heart_image, heart_size)  # Change size ima
 health = [heart_image] * 5  # Number of lives
 
 pizza = pygame.image.load("images/pizza.png").convert_alpha()  # Load pizza image
-pizza = pygame.transform.scale(pizza, pizza_size)  # Change pizza size
+pizza = pygame.transform.scale(pizza, things_size)  # Change pizza size
 
 cola = pygame.image.load("images/cola.png").convert_alpha()  # Load cola image
-cola = pygame.transform.scale(cola, cola_size)  # Change cola size
+cola = pygame.transform.scale(cola, things_size)  # Change cola size
+
+anvil = pygame.image.load("images/anvil.png").convert_alpha()  # Load anvil image
+anvil = pygame.transform.scale(anvil, anvil_size)  # Change anvil size
 
 pygame.mixer.music.load("sound/bgSound.mp3")  # Load background music
 pygame.mixer.music.play(-1)  # Infinite play background music
@@ -176,7 +188,7 @@ finish_sound = pygame.mixer.Sound("sound/finish.mp3")  # Load finish sound
 eating_sound = pygame.mixer.Sound("sound/eating.mp3")  # Load eating sound
 drinking_sound = pygame.mixer.Sound("sound/drinking.mp3")  # Load drinking sound
 lost_sound = pygame.mixer.Sound("sound/lost.mp3")  # Load lost sound
-
+anvil_sound = pygame.mixer.Sound("sound/anvilSound.mp3")  # Load anvil sound
 
 finish_font = pygame.font.Font("fonts/GolosText-VariableFont_wght.ttf", 100)  # Load font
 restart_font = pygame.font.Font("fonts/GolosText-VariableFont_wght.ttf", 50)  # Load font
@@ -185,12 +197,10 @@ scores_fonts = pygame.font.Font("fonts/GolosText-VariableFont_wght.ttf", 50)  # 
 game_over = finish_font.render("Game Over", True, (0, 0, 0))  # Create text
 restart = restart_font.render("Press space to restart", True, (0, 0, 0))  # Create text
 
-
-
 gameplay = True  # Duration of the game
 
-pizza_timer = pygame.USEREVENT + 1  # Creatr timer
-pygame.time.set_timer(pizza_timer, 1000)  # Set timer
+things_timer = pygame.USEREVENT + 1  # Creatr timer
+pygame.time.set_timer(things_timer, 1000)  # Set timer
 
 running = True
 
@@ -206,7 +216,7 @@ def updates():
             scores_update()  # Call scores update
             show_health()  # Show heart
             pan_rect = pan_move()  # Move pan
-            create_pizza(pan_rect)  # Create pizza and check collision with pan
+            create_things(pan_rect)  # Create things and check collision with pan
             change_fast_game()  # Call speeding up the game
         else:
             end_game()  # Call end game
@@ -214,17 +224,22 @@ def updates():
         pygame.display.update()  # Update game
 
         for event in pygame.event.get():
+            random_value = random.randint(0, 20)  # Create random value
+
             if event.type == pygame.QUIT:
                 running = False  # Stop game
                 pygame.quit()  # Quit game
-            if event.type == pizza_timer:
-                random_value = random.randint(0, 20)  # if random_value is equal to 0, create cola 
-                if random_value != 0:
-                    pizza_x = random.randint(0, display_width - pizza_size[0])  # Randint random position X for pizza
-                    pizza_in_game.append(pizza.get_rect(topleft=(pizza_x, pizza_y)))  # Creatr rect model for pizza
+            if event.type == things_timer:
+                if random_value == 0:
+                    things_x = random.randint(0, display_width - things_size[0])  # Randint random position X for cola
+                    cola_in_game.append(cola.get_rect(topleft=(things_x, things_y)))  # Creatr rect model for cola
+                elif random_value >= 1 and random_value <= 5:
+                    things_x = random.randint(0, display_width - things_size[0])  # Randint random position X for anvil
+                    anvil_in_game.append(anvil.get_rect(topleft=(things_x, things_y)))  # Creatr rect model for anvil
                 else:
-                    cola_x = random.randint(0, display_width - pizza_size[0])  # Randint random position X for cola
-                    cola_in_game.append(cola.get_rect(topleft=(cola_x, cola_y)))  # Creatr rect model for cola
+                    things_x = random.randint(0, display_width - anvil_size[0])  # Randint random position X for pizza
+                    pizza_in_game.append(pizza.get_rect(topleft=(things_x, things_y)))  # Creatr rect model for pizza
+
 
         clock.tick(90)
 
