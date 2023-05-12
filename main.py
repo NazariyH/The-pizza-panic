@@ -37,6 +37,15 @@ things_size = (150, 150)  # Things size
 things_x = 0  # Things default x position
 things_y = 70  # Things y position
 
+
+def reset_game_speed():
+    """Resset game speed. Less speed spawn objects"""
+
+    global things_speed
+
+    pygame.time.set_timer(things_timer, 0)  # Delete old timer
+    pygame.time.set_timer(things_timer, 1000)  # Create new timer
+    
 def change_fast_game():
     """Speeding up the game"""
     global things_speed
@@ -136,6 +145,7 @@ def end_game():
     screen.blit(game_over, (display_width / 2 - 220, display_height / 2 - 100))  # Set text on display
     screen.blit(restart, (display_width / 2 - 220, display_height / 2))  # Set text on display
     player_control()  # Check on restart, when player press space
+    reset_game_speed()  # Resset game speed, less speed spawn objects
 
 def player_control():
     """Check on pressed key"""
